@@ -1,0 +1,5 @@
+**__pycache**
+
+/venv
+**/test_results*/
+**ckpts**
