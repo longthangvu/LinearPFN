@@ -5,7 +5,8 @@ class Exp_Basic(object):
         self.args = args
 
         self.device = self._acquire_device()
-        self.model = self._build_model()
+        self.model_args, self.model = self._build_model()
+        self.model.to(self.device)
 
     def _build_model(self):
         raise NotImplementedError

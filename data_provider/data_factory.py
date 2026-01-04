@@ -43,7 +43,7 @@ def data_provider(args, flag):
         freq=freq,
         seasonal_patterns=args.seasonal_patterns,
         train_budget=args.train_budget,
-        # train_stride=args.train_stride
+        train_stride=args.train_stride
     )
     print(flag, len(data_set))
     data_loader = DataLoader(

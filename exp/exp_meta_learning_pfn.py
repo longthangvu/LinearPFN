@@ -42,7 +42,7 @@ class Exp_MetaLearningPFN(Exp_Basic):
             z = z.squeeze(-1)
         return x, z  # [N_ctx, L], [N_ctx, H]
 
-    def test(self, setting, test=0):
+    def test(self):
         """
         PFN eval with standard loaders:
           - context = all train windows
@@ -66,92 +66,85 @@ class Exp_MetaLearningPFN(Exp_Basic):
 
         preds, trues = [], []
         self.model.eval()
-        model_params = sum(p.numel() for p in self.model.parameters())
+        output_root = f'{ckpts_root}/{self.args.model}/{self.args.model_id}/results'
+        out_dir = f'{output_root}/{self.args.data}/{self.args.train_budget}/'
+        os.makedirs(out_dir, exist_ok=True)
 
-        print(f"Model: {model_params:,} parameters")
-        # out_dir = './results/' + setting + f'/C{self.args.c_min}-{self.args.c_max}_Q1-32/{self.args.data}/{self.args.train_budget}/'
-        # os.makedirs(out_dir, exist_ok=True)
+        for i, (bx, by, _, _) in enumerate(test_loader):
+            # bx: [B, L, C], by: [B, label_len+pred_len, C]
+            bx = bx.to(self.device).float()
+            by = by.to(self.device).float()
 
-        # for i, (bx, by, _, _) in enumerate(test_loader):
-        #     # bx: [B, L, C], by: [B, label_len+pred_len, C]
-        #     bx = bx.to(self.device).float()
-        #     by = by.to(self.device).float()
-
-        #     # queries are the whole batch
-        #     qx = bx[..., 0] if bx.shape[-1] > 1 else bx.squeeze(-1)                       # [B, L]
-        #     qy = by[:, -self.args.pred_len:, 0] if by.shape[-1] > 1 else \
-        #          by[:, -self.args.pred_len:, :].squeeze(-1)  # [B, H]
+            # queries are the whole batch
+            qx = bx[..., 0] if bx.shape[-1] > 1 else bx.squeeze(-1)                       # [B, L]
+            qy = by[:, -self.args.pred_len:, 0] if by.shape[-1] > 1 else \
+                 by[:, -self.args.pred_len:, :].squeeze(-1)  # [B, H]
             
-        #     Bq = qx.size(0)
+            Bq = qx.size(0)
 
-        #     # pack as one meta-task: [1, C, L], [1, C, H], [1, Q, L]
-        #     ctx_x_b = ctx_x.unsqueeze(0)
-        #     ctx_z_b = ctx_z.unsqueeze(0)
-        #     qx_b    = qx.unsqueeze(0)
+            # pack as one meta-task: [1, C, L], [1, C, H], [1, Q, L]
+            ctx_x_b = ctx_x.unsqueeze(0)
+            ctx_z_b = ctx_z.unsqueeze(0)
+            qx_b    = qx.unsqueeze(0)
             
-        #     # Query indices immediately follow contexts
-        #     t_qry   = torch.arange(C, C + Bq, dtype=torch.long, device=self.device)  # [B]
-        #     t_qry_b = t_qry.unsqueeze(0)   
+            # Query indices immediately follow contexts
+            t_qry   = torch.arange(C, C + Bq, dtype=torch.long, device=self.device)  # [B]
+            t_qry_b = t_qry.unsqueeze(0)   
 
-        #     # mu, log_sigma2 = self.model(ctx_x_b, ctx_z_b, qx_b)   # [1, B, H]
-        #     if self.args.use_time:
-        #         mu = self.model(ctx_x_b, ctx_z_b, qx_b, t_ctx_b, t_qry_b)
-        #     else:
-        #         mu = self.model(ctx_x_b, ctx_z_b, qx_b)   # [1, B, H]
-        #     mu = mu.squeeze(0).detach().cpu().numpy()             # [B, H]
-        #     y  = qy.detach().cpu().numpy()                        # [B, H]
+            mu = self.model(ctx_x_b, ctx_z_b, qx_b, t_ctx_b, t_qry_b)
+            mu = mu.squeeze(0).detach().cpu().numpy()             # [B, H]
+            y  = qy.detach().cpu().numpy()                        # [B, H]
 
-        #     if test_data.scale and self.args.inverse:
-        #         B, H = mu.shape
-        #         mu = test_data.inverse_transform(mu.reshape(B * H, 1)).reshape(B, H)
-        #         y  = test_data.inverse_transform(y.reshape(B * H, 1)).reshape(B, H)
+            if test_data.scale and self.args.inverse:
+                B, H = mu.shape
+                mu = test_data.inverse_transform(mu.reshape(B * H, 1)).reshape(B, H)
+                y  = test_data.inverse_transform(y.reshape(B * H, 1)).reshape(B, H)
 
-        #     preds.append(mu)
-        #     trues.append(y)
+            preds.append(mu)
+            trues.append(y)
 
-        #     # inverse the history input 
-        #     inp = bx.detach().cpu().numpy()
-        #     if inp.shape[-1] > 1:
-        #         inp = inp[..., 0:1]  # keep first channel
-        #     if test_data.scale and self.args.inverse:
-        #         B, L, C = inp.shape
-        #         inp = test_data.inverse_transform(inp.reshape(B*L, C)).reshape(B, L, C)
-        #     hist = inp[0, :, -1]  # [L]
-        #     gt = np.concatenate((hist, y[0]), axis=0)  # history + true future
-        #     pd = np.concatenate((hist, mu[0]), axis=0)  # history + predicted future
-        #     visual(gt, pd, os.path.join(out_dir, f'viz_{i}.pdf'))
+            # inverse the history input 
+            inp = bx.detach().cpu().numpy()
+            if inp.shape[-1] > 1:
+                inp = inp[..., 0:1]  # keep first channel
+            if test_data.scale and self.args.inverse:
+                B, L, C = inp.shape
+                inp = test_data.inverse_transform(inp.reshape(B*L, C)).reshape(B, L, C)
+            hist = inp[0, :, -1]  # [L]
+            gt = np.concatenate((hist, y[0]), axis=0)  # history + true future
+            pd = np.concatenate((hist, mu[0]), axis=0)  # history + predicted future
+            visual(gt, pd, os.path.join(out_dir, f'viz_{i}.pdf'))
 
-        # preds = np.concatenate(preds, axis=0)  # [N_test, H]
-        # trues = np.concatenate(trues, axis=0)  # [N_test, H]
-        # print('preds:', preds.shape, 'trues:', trues.shape)
+        preds = np.concatenate(preds, axis=0)  # [N_test, H]
+        trues = np.concatenate(trues, axis=0)  # [N_test, H]
+        print('preds:', preds.shape, 'trues:', trues.shape)
 
-        # mae, mse, rmse, mape, mspe = metric(preds, trues)
-        # print(f'mse:{mse}, mae:{mae}, rmse:{rmse}, mape:{mape}, mspe:{mspe}')
+        mae, mse, rmse, mape, mspe = metric(preds, trues)
+        print(f'mse:{mse}, mae:{mae}, rmse:{rmse}, mape:{mape}, mspe:{mspe}')
         
-        # csv_path = 'results.csv'
-        # header = ['dataset', 'train_budget', 'seq_len', 'pred_len',
-        #           'd_model', 'e_layers', 'n_heads', 'd_ff',
-        #           'mae', 'mse', 'rmse', 'mape', 'mspe']
-        # row = [self.args.data, self.args.train_budget, self.args.seq_len, self.args.pred_len,
-        #        self.args.d_model, self.args.e_layers, self.args.n_heads, self.args.d_ff,
-        #        mae, mse, rmse, mape, mspe]
+        csv_path = 'results.csv'
 
-        # write_header = not os.path.exists(csv_path)
-        # with open(csv_path, 'a', newline='') as f:
-        #     writer = csv.writer(f)
-        #     if write_header:
-        #         writer.writerow(['model'] + header)
-        #     writer.writerow([self.args.model] + row)
+        base_row = {"model": self.args.model, "model_id": self.args.model_id,
+                    "dataset": self.args.data, "train_budget": self.args.train_budget,
+                    "seq_len": self.args.seq_len, "pred_len": self.args.pred_len,
+                    "mae": mae, "mse": mse, "rmse": rmse, "mape": mape, "mspe": mspe}
 
-        # csv_p = './results/' + setting + f'/C{self.args.c_min}-{self.args.c_max}_Q1-32' + '/results.csv'
-        # write_header = not os.path.exists(csv_p)
-        # with open(csv_p, 'a', newline='') as f:
-        #     writer = csv.writer(f)
-        #     if write_header:
-        #         writer.writerow(header)
-        #     writer.writerow(row)
+        write_header = not os.path.exists(csv_path)
+        with open(csv_path, 'a', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=base_row.keys())
+            if write_header: writer.writeheader()
+            writer.writerow(base_row)
 
-        # np.save(os.path.join(out_dir, 'metrics.npy'), np.array([mae, mse, rmse, mape, mspe]))
-        # np.save(os.path.join(out_dir, 'pred.npy'), preds)
-        # np.save(os.path.join(out_dir, 'true.npy'), trues)
+        csv_p = f'{output_root}/results.csv'
+        model_dict = {**base_row, **self.model_args}
+        write_header = not os.path.exists(csv_p)
+        with open(csv_p, 'a', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=model_dict.keys())
+            if write_header:
+                writer.writeheader()
+            writer.writerow(model_dict)
+
+        np.save(os.path.join(out_dir, 'metrics.npy'), np.array([mae, mse, rmse, mape, mspe]))
+        np.save(os.path.join(out_dir, 'pred.npy'), preds)
+        np.save(os.path.join(out_dir, 'true.npy'), trues)
         return

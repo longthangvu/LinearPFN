@@ -37,11 +37,9 @@ if __name__ == '__main__':
     parser.add_argument('--train_budget', type=float, default=1.0, help='length of training sequence')
     parser.add_argument('--ckpts_root', type=str, default='training/ckpts', help='location of model checkpoints')
     parser.add_argument('--ckpt_file', type=str, default='best_model.pt', help='model checkpoints filename')
-    # parser.add_argument('--data_version', type=str, default='')
-    # parser.add_argument('--c_min', type=int, default=32)
-    # parser.add_argument('--c_max', type=int, default=1536)
-    # parser.add_argument('--train_stride', type=int, default=16)
-    # parser.add_argument('--use_time', type=bool, default=True)
+
+    parser.add_argument('--train_stride', type=int, default=16)
+
     
     # forecasting task
     parser.add_argument('--seq_len', type=int, default=96, help='input sequence length')
@@ -132,12 +130,12 @@ if __name__ == '__main__':
     # print('Args in experiment:')
     # print_args(args)
 
-    exp = Exp_MetaLearningPFN(args)  # set experiments
+    exp = Exp_MetaLearningPFN(args)
 
-    setting = f'{args.model}/{args.model_id}'
-    print(f'>>>>>>>testing : {setting}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
+    setting = f'{args.model}-{args.model_id}-{args.data}-{args.seq_len}-{args.pred_len}-{args.train_budget}'
+    print(f'>>>>>>> testing : {setting} <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')
     
-    exp.test(setting, test=1)
+    exp.test()
     if args.gpu_type == 'mps':
         torch.backends.mps.empty_cache()
     elif args.gpu_type == 'cuda':
