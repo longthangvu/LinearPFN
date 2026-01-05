@@ -7,4 +7,6 @@
 **ckpts**
 results.csv
 
-training/notebooks/
+notebooks/
+jobs.txt
+tb_**/

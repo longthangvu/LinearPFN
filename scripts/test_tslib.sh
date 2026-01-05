@@ -26,8 +26,6 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-log_file="$ckpts_root/$model/$model_id/tslib_tests.log"
-
 for f in ./scripts/tslib/*; do
     echo Start: $f 
     echo "$(date +"%T")"
@@ -41,4 +39,4 @@ for f in ./scripts/tslib/*; do
             --train_budget $train_budget 
     echo Done: $f 
     echo "$(date +"%T")"
-done >> $log_file
+done

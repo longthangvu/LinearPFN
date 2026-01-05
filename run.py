@@ -35,7 +35,7 @@ if __name__ == '__main__':
     
     # additional params for pfns
     parser.add_argument('--train_budget', type=float, default=1.0, help='length of training sequence')
-    parser.add_argument('--ckpts_root', type=str, default='training/ckpts', help='location of model checkpoints')
+    parser.add_argument('--ckpts_root', type=str, default='output', help='location of model checkpoints')
     parser.add_argument('--ckpt_file', type=str, default='best_model.pt', help='model checkpoints filename')
 
     parser.add_argument('--train_stride', type=int, default=16)
