@@ -1,16 +1,16 @@
 import torch
 import torch.nn as nn
 
-from .layers.pfn_encoder import RecencyBias, PFNEncoderLayerRecency, ZeroRecencyBias
+from .layers.pfn_block import RecencyBias, NoRecencyBias
 from .layers.pfn_backbone import PFNBackbone
-from .layers.patch_embedder import InputEncoder
+from .layers.patch_embedder import InputEmbedder
 from .layers.mask_builder import MaskBuilder
 
 class LinearPFN(nn.Module):
     def __init__(self, L=20, H=10, d=256, L_blk=6, n_heads=8, d_ff=1024, dropout=0.1, recency_init=1e-2):
         super().__init__()
         self.L, self.H, self.d = L, H, d
-        self.enc = InputEncoder(L, H, d)
+        self.enc = InputEmbedder(L, H, d)
         self.recency = RecencyBias(n_heads, init_alpha=recency_init, learnable=True)
         # self.recency = ZeroRecencyBias(n_heads)
         self.backbone = PFNBackbone(d, n_heads, d_ff, dropout, self.recency, L_blk)

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-class InputEncoder(nn.Module):
+class InputEmbedder(nn.Module):
     def __init__(self, L, H, d):
         super().__init__()
         self.ctx = nn.Linear(L + H, d)

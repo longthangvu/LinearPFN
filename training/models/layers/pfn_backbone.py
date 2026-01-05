@@ -1,11 +1,11 @@
 import torch.nn as nn
-from .pfn_encoder import PFNEncoderLayerRecency
+from .pfn_block import PFNTransformer
 
 class PFNBackbone(nn.Module):
     def __init__(self, d, n_heads, d_ff, dropout, recency, L_blk):
         super().__init__()
         self.blocks = nn.ModuleList([
-            PFNEncoderLayerRecency(d, n_heads, d_ff, dropout, recency)
+            PFNTransformer(d, n_heads, d_ff, dropout, recency)
             for _ in range(L_blk)
         ])
 

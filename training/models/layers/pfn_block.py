@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-class ZeroRecencyBias(nn.Module):
+class NoRecencyBias(nn.Module):
     def __init__(self, n_heads: int):
         super().__init__()
         self.n_heads = n_heads
@@ -55,7 +55,7 @@ class MHAWithRecency(nn.Module):
         out, _ = self.mha(X, X, X, attn_mask=attn_mask, need_weights=False)
         return out
 
-class PFNEncoderLayerRecency(nn.Module):
+class PFNTransformer(nn.Module):
     def __init__(self, d_model, n_heads, d_ff, dropout, bias_mod: RecencyBias):
         super().__init__()
         self.attn = MHAWithRecency(d_model, n_heads, bias_mod, dropout=dropout)

@@ -1,6 +1,10 @@
 **__pycache__**
 
 /venv
+
+**series_bank/
 /output**
 **ckpts**
 results.csv
+
+training/notebooks/
