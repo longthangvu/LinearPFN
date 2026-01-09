@@ -16,9 +16,9 @@ class _ShardSeriesDataset:
         if not self.shards_dir.exists():
             raise FileNotFoundError(f"Shards directory not found: {self.shards_dir}")
 
-        self._paths: List[Path] = sorted(self.shards_dir.glob("series_shard_*.npy"))
+        self._paths: List[Path] = sorted(self.shards_dir.glob("y_shard_*.npy"))
         if not self._paths:
-            raise FileNotFoundError(f"No shard files matched 'series_shard_*.npy' in {self.shards_dir}")
+            raise FileNotFoundError(f"No shard files matched 'y_shard_*.npy' in {self.shards_dir}")
 
         # Index shard sizes without loading into RAM
         self._sizes: List[int] = []

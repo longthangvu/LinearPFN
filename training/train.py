@@ -10,8 +10,14 @@ from utils.build_model import build_model
 
 from training.data.meta_dataset import VariableMetaDataset
 from training.util import validate_model, gaussian_nll_loss, get_opt_lr_schedule
+from utils.tools import set_seed
 
 def main(args):
+    set_seed(42)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Using device: {device}")
+    
+    # model
     ckpts_root = args.ckpts_root
     model_name, model_id = args.model, args.model_id
     ckpt_dir=f'{ckpts_root}/{model_name}/{model_id}'
@@ -19,38 +25,34 @@ def main(args):
     with open(f'{ckpt_dir}/run_config.json', 'r') as file:
         run_config = json.load(file)
         model_args = run_config['model_params']
-    model = build_model(model_args, model_name)
-    
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f"Using device: {device}")
-    model = model.to(device)
-    
+    model = build_model(model_args, model_name).to(device)
+
+    # dataset
     dataset = VariableMetaDataset(**run_config['data'], device=device)
     dataset_meta = f"C{dataset.C_range}_Q{dataset.Q_range}"
     
-    config = run_config['train_config']
-    optimizer, scheduler = get_opt_lr_schedule(model, config)
-
+    # train config
     save_dir = f"{ckpt_dir}/ckpts"
     Path(save_dir).mkdir(exist_ok=True, parents=True)
-    
     log_dir = f"tb_train/{model_name}/{model_id}/{dataset_meta}"
     writer = SummaryWriter(log_dir=log_dir)
     
+    config = run_config['train_config']
+    optimizer, scheduler = get_opt_lr_schedule(model, config)
+    criterion = nn.MSELoss()
     n_epochs = config['total_tasks'] // config['tasks_per_epoch']
-
+    
     print(f"\nTraining Plan:")
     print(f"  Total meta-tasks: {config['total_tasks']:,}")
     print(f"  Tasks per epoch: {config['tasks_per_epoch']:,}")
     print(f"  Total epochs: {n_epochs}")
 
+    # init
     history = defaultdict(list)
     best_val_loss = float('inf')
     patience_counter = 0
     start_time = time.time()
     global_task_count = 0
-
-    criterion = nn.MSELoss()
     
     print("Running initial validation...")
     val_metrics = validate_model(model, dataset, device, config['n_val_tasks'])

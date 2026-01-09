@@ -8,5 +8,5 @@
 results.csv
 
 notebooks/
-jobs.txt
+**jobs**.txt
 tb_**/
