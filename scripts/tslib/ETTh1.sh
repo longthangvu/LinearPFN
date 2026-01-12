@@ -6,6 +6,7 @@ data_path="../Time-Series-Library/dataset"
 
 model=LinearPFN
 model_id=from_paper
+seed=42
 ckpts_root=output
 ckpt_file=best_model.pt
 train_budget=1.0
@@ -18,6 +19,7 @@ while [[ "$#" -gt 0 ]]; do
         --data_path) data_path="$2"; shift ;;
         --model) model="$2"; shift ;;
         --model_id) model_id="$2"; shift ;;
+        --seed) seed="$2"; shift ;;
         --ckpts_root) ckpts_root="$2"; shift ;;
         --ckpt_file) ckpt_file="$2"; shift ;;
         --train_budget) train_budget="$2"; shift ;;
@@ -37,4 +39,5 @@ python run.py \
   --features S \
   --seq_len $seq_len --label_len 36 \
   --pred_len $pred_len \
-  --train_budget $train_budget
+  --train_budget $train_budget \
+  --seed $seed 
