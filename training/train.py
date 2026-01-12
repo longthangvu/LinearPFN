@@ -32,9 +32,9 @@ def main(args):
     dataset_meta = f"C{dataset.C_range}_Q{dataset.Q_range}"
     
     # train config
-    save_dir = f"{ckpt_dir}/ckpts"
+    save_dir = f"{ckpt_dir}/{args.seed}/ckpts"
     Path(save_dir).mkdir(exist_ok=True, parents=True)
-    log_dir = f"tb_train/{model_name}/{model_id}/{dataset_meta}"
+    log_dir = f"tb_train/{model_name}/{model_id}/{args.seed}/{dataset_meta}"
     writer = SummaryWriter(log_dir=log_dir)
     
     config = run_config['train_config']
@@ -208,14 +208,12 @@ def main(args):
     print(f"Model saved in {save_dir}")
         
 if __name__ == '__main__':
-    torch.manual_seed(42)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed(42)
-    
     parser = argparse.ArgumentParser(description='Training Script')
     parser.add_argument('--ckpts_root', type=str, default='output', help='output directory')
     parser.add_argument('--model', type=str, default='LinearPFN', help='model name')
-    parser.add_argument('--model_id', type=str, default='test', help='')
-
+    parser.add_argument('--model_id', type=str, default='test', help='model id')
+    parser.add_argument('--seed', type=int, default=42, help='model seed')
     args = parser.parse_args()
+    
+    set_seed(args.seed)
     main(args)

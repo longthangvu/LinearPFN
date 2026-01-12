@@ -22,6 +22,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_id', type=str, required=True, default='test', help='model id')
     parser.add_argument('--model', type=str, required=True, default='LinearPFN',
                         help='model name, options: [Autoformer, Transformer, TimesNet]')
+    parser.add_argument('--seed', type=str, required=True, default=42, help='model seed')
     # data loader
     parser.add_argument('--data', type=str, required=True, default='ETTh1', help='dataset type')
     parser.add_argument('--root_path', type=str, default='../Time-Series-Library/dataset/', help='root path of the data file')

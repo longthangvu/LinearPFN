@@ -66,7 +66,7 @@ class Exp_MetaLearningPFN(Exp_Basic):
 
         preds, trues = [], []
         self.model.eval()
-        output_root = f'{self.args.ckpts_root}/{self.args.model}/{self.args.model_id}/results'
+        output_root = f'{self.args.ckpts_root}/{self.args.model}/{self.args.model_id}/{self.args.seed}/results'
         out_dir = f'{output_root}/{self.args.data}/{self.args.train_budget}/'
         os.makedirs(out_dir, exist_ok=True)
 
@@ -124,7 +124,7 @@ class Exp_MetaLearningPFN(Exp_Basic):
         
         csv_path = 'results.csv'
 
-        base_row = {"model": self.args.model, "model_id": self.args.model_id,
+        base_row = {"model": self.args.model, "model_id": self.args.model_id, "seed": self.args.seed,
                     "dataset": self.args.data, "train_budget": self.args.train_budget,
                     "seq_len": self.args.seq_len, "pred_len": self.args.pred_len,
                     "mae": mae, "mse": mse, "rmse": rmse, "mape": mape, "mspe": mspe}
