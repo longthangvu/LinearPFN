@@ -13,7 +13,6 @@ from training.util import validate_model, gaussian_nll_loss, get_opt_lr_schedule
 from utils.tools import set_seed
 
 def main(args):
-    set_seed(42)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
     
@@ -216,4 +215,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     set_seed(args.seed)
+    # print(args.seed)
     main(args)

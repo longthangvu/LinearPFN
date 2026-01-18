@@ -16,7 +16,7 @@ class Exp_MetaLearningPFN(Exp_Basic):
         super(Exp_MetaLearningPFN, self).__init__(args)
 
     def _build_model(self):
-        return build_model_from_ckpt(model_name=self.args.model, model_id=self.args.model_id,
+        return build_model_from_ckpt(model_name=self.args.model, model_id=self.args.model_id, seed=self.args.seed,
                            ckpts_root=self.args.ckpts_root, ckpt_file=self.args.ckpt_file)
 
     def _get_data(self, flag):
