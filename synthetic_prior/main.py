@@ -10,7 +10,7 @@ from synthetic_prior.misc import dotdict
 from synthetic_prior.generation import make_multiple_series
 
 def main(args):
-    out_dir = f'series_bank/{args.dataset_id}'
+    out_dir = f'../LinearPFN/series_bank/{args.dataset_id}'
     with open(f'{out_dir}/meta.json', 'r') as file:
         meta_data = json.load(file)
     device = torch.device('cuda') if torch.cuda.is_available() else 'cpu'
