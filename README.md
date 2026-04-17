@@ -33,3 +33,9 @@ bash scripts/test_tslib.sh --load_from hf
 | exchange | 0.12550306 | 0.26700076 |
 | traffic | 0.24860084 | 0.34372288 |
 | weather | 0.001456768 | 0.030810302 |
+
+## Qualitative Examples
+
+The notebook [`qualitative_examples.ipynb`](qualitative_examples.ipynb) uses the public LinearPFN weights to generate forecasts on eight synthetic series.
+
+![LinearPFN qualitative forecasts](qualitative_examples.png)
