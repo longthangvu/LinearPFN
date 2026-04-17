@@ -1,5 +1,8 @@
 import os, json
 import torch
+from huggingface_hub import hf_hub_download
+
+LINEARPFN_HF_REPO_ID = 'longthangvu/LinearPFN'
 
 def build_model_from_ckpt(model_id, model_name='LinearPFN', ckpts_root='output', ckpt_file='best_model.pt', seed=42):
     ckpt_dir=f'{ckpts_root}/{model_name}/{model_id}'
@@ -12,9 +15,25 @@ def build_model_from_ckpt(model_id, model_name='LinearPFN', ckpts_root='output',
     ckpt_path = os.path.join(f'{ckpt_dir}/{seed}/ckpts', ckpt_file)
     print(ckpt_path)
     print(model_args)
-    ckpt = torch.load(ckpt_path, weights_only=False)
+    ckpt = torch.load(ckpt_path, map_location='cpu', weights_only=False)
     model.load_state_dict(ckpt['model_state_dict'])
     
+    return model_args, model
+
+def build_model_from_hf(model_name='LinearPFN'):
+    print('Loading model from Hugging Face Hub...')
+    print(LINEARPFN_HF_REPO_ID)
+    config_path = hf_hub_download(repo_id=LINEARPFN_HF_REPO_ID, filename='run_config.json')
+    ckpt_path = hf_hub_download(repo_id=LINEARPFN_HF_REPO_ID, filename='best_model.pt')
+    with open(config_path, 'r') as file:
+        model_args = json.load(file)['model_params']
+    model = build_model(model_args, model_name)
+
+    print(ckpt_path)
+    print(model_args)
+    ckpt = torch.load(ckpt_path, map_location='cpu', weights_only=False)
+    model.load_state_dict(ckpt['model_state_dict'])
+
     return model_args, model
 
 def build_model(model_args, model_name='LinearPFN'):

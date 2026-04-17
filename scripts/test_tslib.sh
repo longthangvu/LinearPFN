@@ -10,6 +10,7 @@ seed=42
 ckpts_root=output
 ckpt_file=best_model.pt
 train_budget=1.0
+load_from=local
 
 # Parse arguments
 while [[ "$#" -gt 0 ]]; do
@@ -23,6 +24,7 @@ while [[ "$#" -gt 0 ]]; do
         --ckpts_root) ckpts_root="$2"; shift ;;
         --ckpt_file) ckpt_file="$2"; shift ;;
         --train_budget) train_budget="$2"; shift ;;
+        --load_from) load_from="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
@@ -39,7 +41,8 @@ for f in ./scripts/tslib/*; do
             --seq_len $seq_len \
             --pred_len $pred_len \
             --train_budget $train_budget \
-            --seed $seed
+            --seed $seed \
+            --load_from $load_from
     echo Done: $f 
     echo "$(date +"%T")"
 done

@@ -1,13 +1,11 @@
 import os
-import warnings
 import numpy as np
 import torch
 import csv
-import heapq, random
 
 from data_provider.data_factory import data_provider
 from exp.exp_basic import Exp_Basic
-from utils.build_model import build_model_from_ckpt
+from utils.build_model import build_model_from_ckpt, build_model_from_hf
 from utils.metrics import metric
 from utils.tools import visual
 
@@ -16,6 +14,8 @@ class Exp_MetaLearningPFN(Exp_Basic):
         super(Exp_MetaLearningPFN, self).__init__(args)
 
     def _build_model(self):
+        if self.args.load_from == 'hf':
+            return build_model_from_hf(model_name=self.args.model)
         return build_model_from_ckpt(model_name=self.args.model, model_id=self.args.model_id, seed=self.args.seed,
                            ckpts_root=self.args.ckpts_root, ckpt_file=self.args.ckpt_file)
 

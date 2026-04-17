@@ -38,6 +38,8 @@ if __name__ == '__main__':
     parser.add_argument('--train_budget', type=float, default=1.0, help='length of training sequence')
     parser.add_argument('--ckpts_root', type=str, default='output', help='location of model checkpoints')
     parser.add_argument('--ckpt_file', type=str, default='best_model.pt', help='model checkpoints filename')
+    parser.add_argument('--load_from', type=str, default='local', choices=['local', 'hf'],
+                        help='load model from local checkpoint tree or Hugging Face Hub')
 
     parser.add_argument('--train_stride', type=int, default=16)
 
